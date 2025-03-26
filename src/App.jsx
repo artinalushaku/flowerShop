@@ -5,6 +5,7 @@ import AdminDashboard from './components/AdminDashboard';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import ProtectedRoute from './components/ProtectedRoute';
+import AboutUs from './components/AboutUs';
 
 // AppContent component that can access useLocation
 const AppContent = () => {
@@ -121,6 +122,7 @@ const AppContent = () => {
         <Route path="/signup" element={<Signup />} />
         <Route path="/" element={<HomePage />} />
         {/* Add other routes here */}
+        <Route path="/about" element={<AboutUs />} />
       </Routes>
     </div>
   );
