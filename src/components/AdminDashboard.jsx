@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductManagement from './ProductManagement';
 import UserManagement from './UserManagement';
@@ -70,18 +70,58 @@ function AdminDashboard() {
 }
 
 function DashboardOverview() {
+  const [productCount, setProductCount] = useState(0);
+  const [userCount, setUserCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch products count
+        const productsResponse = await fetch('http://localhost:5000/api/products');
+        const productsData = await productsResponse.json();
+        setProductCount(productsData.length);
+        
+        // Fetch users count
+        const token = localStorage.getItem('token');
+        const usersResponse = await fetch('http://localhost:5000/api/auth/users', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (usersResponse.ok) {
+          const usersData = await usersResponse.json();
+          setUserCount(usersData.length);
+        }
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchDashboardData();
+  }, []);
+
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6">Dashboard Overview</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold text-gray-700">Products</h3>
-          <div className="text-3xl font-bold text-rose-600 mt-2">24</div>
+          <div className="text-3xl font-bold text-rose-600 mt-2">
+            {isLoading ? '...' : productCount}
+          </div>
           <p className="text-gray-500 mt-2">Total products in store</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold text-gray-700">Users</h3>
-          <div className="text-3xl font-bold text-rose-600 mt-2">12</div>
+          <div className="text-3xl font-bold text-rose-600 mt-2">
+            {isLoading ? '...' : userCount}
+          </div>
           <p className="text-gray-500 mt-2">Registered users</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">

@@ -7,6 +7,8 @@ import Signup from './components/Signup';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import AboutUs from './components/AboutUs';
+import Shop from './components/Shop';
+
 
 // AppContent component that can access useLocation
 const AppContent = () => {
@@ -119,6 +121,7 @@ const AppContent = () => {
             <ProductManagement />
           </ProtectedRoute>
         } />
+        <Route path="/shop" element={<Shop />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
        
@@ -150,7 +153,7 @@ function HomePage() {
             <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
               <span className="block">Welcome to</span>
               <span className="block text-rose-600">Blooming Delights</span>
-            </h1>
+    </h1>
             <p className="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
               Discover the perfect flowers for every occasion. From romantic roses to cheerful sunflowers, we have everything to make your moments special.
             </p>
