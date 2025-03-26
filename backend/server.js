@@ -9,6 +9,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
 // Sync sequelize models
 sequelize.sync({ alter: true })
   .then(() => console.log('Database synchronized'))

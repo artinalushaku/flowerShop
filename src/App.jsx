@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import ProductManagement from './components/ProductManagement';
 import AdminDashboard from './components/AdminDashboard';
+import Login from './components/Login';
+import Signup from './components/Signup';
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -62,6 +64,8 @@ function App() {
         <Routes>
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/products" element={<ProductManagement />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/" element={<HomePage />} />
           {/* Add other routes here */}
         </Routes>
@@ -104,21 +108,21 @@ function HomePage() {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {/* Category Cards */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div className="h-48 bg-[url('https://images.unsplash.com/photo-1424894408462-65c2a5d636b0')] bg-cover bg-center"></div>
+                <div className="h-48 bg-[url('https://modernwedding.com.au/wp-content/uploads/2014/12/02/Chanele-Rose-Flowers-Pretty-Wedding-Bouquet.jpg')] bg-cover bg-center hover:scale-105 transition-transform duration-300"></div>
                 <div className="p-4">
                   <h3 className="text-xl font-semibold text-gray-900">Wedding Flowers</h3>
                   <p className="mt-2 text-gray-600">Perfect arrangements for your special day</p>
                 </div>
               </div>
               <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div className="h-48 bg-[url('https://images.unsplash.com/photo-1561181286-d3fee7d55364')] bg-cover bg-center"></div>
+                <div className="h-48 bg-[url('https://images.unsplash.com/photo-1561181286-d3fee7d55364')] bg-cover bg-center hover:scale-105 transition-transform duration-300"></div>
                 <div className="p-4">
                   <h3 className="text-xl font-semibold text-gray-900">Birthday Bouquets</h3>
                   <p className="mt-2 text-gray-600">Celebrate with beautiful blooms</p>
                 </div>
               </div>
               <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div className="h-48 bg-[url('https://images.unsplash.com/photo-1562690868-60bbe7293e94')] bg-cover bg-center"></div>
+                <div className="h-48 bg-[url('https://images.unsplash.com/photo-1562690868-60bbe7293e94')] bg-cover bg-center hover:scale-105 transition-transform duration-300"></div>
                 <div className="p-4">
                   <h3 className="text-xl font-semibold text-gray-900">Seasonal Specials</h3>
                   <p className="mt-2 text-gray-600">Fresh picks for every season</p>

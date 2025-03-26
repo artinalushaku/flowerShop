@@ -58,7 +58,6 @@ function AdminDashboard() {
   );
 }
 
-// Simple dashboard overview component
 function DashboardOverview() {
   return (
     <div>
