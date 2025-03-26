@@ -4,6 +4,7 @@ import ProductManagement from './components/ProductManagement';
 import AdminDashboard from './components/AdminDashboard';
 import Login from './components/Login';
 import Signup from './components/Signup';
+
 import ProtectedRoute from './components/ProtectedRoute';
 import AboutUs from './components/AboutUs';
 
@@ -120,6 +121,7 @@ const AppContent = () => {
         } />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+       
         <Route path="/" element={<HomePage />} />
         {/* Add other routes here */}
         <Route path="/about" element={<AboutUs />} />
@@ -170,7 +172,7 @@ function HomePage() {
             <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {/* Wedding Flowers */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div className="h-48 bg-[url('https://images.unsplash.com/photo-1600055833209-fd657e3e918d')] bg-cover bg-center hover:scale-105 transition-transform duration-300"></div>
+                <div className="h-48 bg-[url('/wedding-flowers.jpg')] bg-cover bg-center hover:scale-105 transition-transform duration-300"></div>
                 <div className="p-4">
                   <h3 className="text-xl font-semibold text-gray-900">Wedding Flowers</h3>
                   <p className="mt-2 text-gray-600">Perfect arrangements for your special day</p>
@@ -179,7 +181,7 @@ function HomePage() {
 
               {/* Birthday Bouquets */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div className="h-48 bg-[url('https://images.unsplash.com/photo-1586968793427-2badf9549fb4')] bg-cover bg-center hover:scale-105 transition-transform duration-300"></div>
+                <div className="h-48 bg-[url('/birthday-flowers.jpg')] bg-cover bg-center hover:scale-105 transition-transform duration-300"></div>
                 <div className="p-4">
                   <h3 className="text-xl font-semibold text-gray-900">Birthday Bouquets</h3>
                   <p className="mt-2 text-gray-600">Celebrate with our colorful flowers</p>
@@ -188,7 +190,7 @@ function HomePage() {
 
               {/* Seasonal Specials */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <div className="h-48 bg-[url('https://images.unsplash.com/photo-1562690868-71e9a2c79d91')] bg-cover bg-center hover:scale-105 transition-transform duration-300"></div>
+                <div className="h-48 bg-[url('/seasonal-flowers.jpg')] bg-cover bg-center hover:scale-105 transition-transform duration-300"></div>
                 <div className="p-4">
                   <h3 className="text-xl font-semibold text-gray-900">Seasonal Specials</h3>
                   <p className="mt-2 text-gray-600">Fresh picks for every season</p>
