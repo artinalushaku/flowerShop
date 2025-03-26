@@ -1,23 +1,26 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Signup() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    number: '',
+    phoneNumber: '',
     username: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    isAdmin: false
   });
   const [errors, setErrors] = useState({});
+  const [signupError, setSignupError] = useState('');
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData({
       ...formData,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     });
     
     // Clear error when user starts typing
@@ -27,6 +30,7 @@ function Signup() {
         [name]: ''
       });
     }
+    setSignupError('');
   };
 
   const validate = () => {
@@ -46,8 +50,8 @@ function Signup() {
       newErrors.email = 'Email is invalid';
     }
     
-    if (!formData.number) {
-      newErrors.number = 'Phone number is required';
+    if (!formData.phoneNumber) {
+      newErrors.phoneNumber = 'Phone number is required';
     }
     
     if (!formData.username) {
@@ -67,7 +71,7 @@ function Signup() {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     const newErrors = validate();
@@ -76,9 +80,42 @@ function Signup() {
       return;
     }
     
-    // Here you would normally handle signup with your API
-    console.log('Signup submitted:', formData);
-    // For now, just log the form data
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          username: formData.username,
+          password: formData.password,
+          role: formData.isAdmin ? 'admin' : 'user'
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      // Store token and user data in localStorage
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      // Redirect based on role
+      if (data.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
+    } catch (error) {
+      setSignupError(error.message || 'An error occurred during registration');
+    }
   };
 
   return (
@@ -94,6 +131,11 @@ function Signup() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          {signupError && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {signupError}
+            </div>
+          )}
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
               <div>
@@ -161,22 +203,22 @@ function Signup() {
             </div>
 
             <div>
-              <label htmlFor="number" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
                 Phone number
               </label>
               <div className="mt-1">
                 <input
-                  id="number"
-                  name="number"
+                  id="phoneNumber"
+                  name="phoneNumber"
                   type="tel"
                   autoComplete="tel"
                   required
-                  value={formData.number}
+                  value={formData.phoneNumber}
                   onChange={handleChange}
-                  className={`appearance-none block w-full px-3 py-2 border ${errors.number ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm`}
+                  className={`appearance-none block w-full px-3 py-2 border ${errors.phoneNumber ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-rose-500 focus:border-rose-500 sm:text-sm`}
                 />
-                {errors.number && (
-                  <p className="mt-2 text-sm text-red-600">{errors.number}</p>
+                {errors.phoneNumber && (
+                  <p className="mt-2 text-sm text-red-600">{errors.phoneNumber}</p>
                 )}
               </div>
             </div>
@@ -242,6 +284,20 @@ function Signup() {
                   <p className="mt-2 text-sm text-red-600">{errors.confirmPassword}</p>
                 )}
               </div>
+            </div>
+
+            <div className="flex items-center">
+              <input
+                id="isAdmin"
+                name="isAdmin"
+                type="checkbox"
+                checked={formData.isAdmin}
+                onChange={handleChange}
+                className="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded"
+              />
+              <label htmlFor="isAdmin" className="ml-2 block text-sm text-gray-900">
+                Register as admin (for development)
+              </label>
             </div>
 
             <div>

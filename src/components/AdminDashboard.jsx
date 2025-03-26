@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProductManagement from './ProductManagement';
+import UserManagement from './UserManagement';
 
 function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState('products');
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   const renderContent = () => {
     switch(activeTab) {
       case 'products':
         return <ProductManagement />;
+      case 'users':
+        return <UserManagement />;
       case 'dashboard':
         return <DashboardOverview />;
       default:
@@ -41,6 +44,14 @@ function AdminDashboard() {
                 </button>
               </li>
               <li>
+                <button 
+                  onClick={() => setActiveTab('users')}
+                  className={`w-full text-left px-4 py-2 rounded ${activeTab === 'users' ? 'bg-rose-800' : 'hover:bg-rose-600'}`}
+                >
+                  Manage Users
+                </button>
+              </li>
+              <li>
                 <Link to="/" className="block px-4 py-2 rounded hover:bg-rose-600">
                   Back to Website
                 </Link>
@@ -69,9 +80,9 @@ function DashboardOverview() {
           <p className="text-gray-500 mt-2">Total products in store</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-700">Orders</h3>
+          <h3 className="text-lg font-semibold text-gray-700">Users</h3>
           <div className="text-3xl font-bold text-rose-600 mt-2">12</div>
-          <p className="text-gray-500 mt-2">Pending orders</p>
+          <p className="text-gray-500 mt-2">Registered users</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h3 className="text-lg font-semibold text-gray-700">Revenue</h3>
@@ -82,8 +93,9 @@ function DashboardOverview() {
       
       <div className="bg-white p-6 rounded-lg shadow-md mt-6">
         <h3 className="text-lg font-semibold text-gray-700 mb-4">Quick Stats</h3>
-        <p className="text-gray-600">Welcome to your admin dashboard. Here you can manage your products, view orders, and check your store's performance.</p>
+        <p className="text-gray-600">Welcome to your admin dashboard. Here you can manage your products, users, and check your store's performance.</p>
         <p className="text-gray-600 mt-2">Click on "Manage Products" in the sidebar to add, edit, or delete products.</p>
+        <p className="text-gray-600 mt-2">Click on "Manage Users" to view and update user information and roles.</p>
       </div>
     </div>
   );

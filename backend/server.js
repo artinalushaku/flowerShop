@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import sequelize from './db.js';
 import productRoutes from './routes/productRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 const app = express();
 
@@ -17,6 +18,8 @@ sequelize.sync({ alter: true })
 
 // Routes
 app.use('/api/products', productRoutes);
+app.use('/api/auth', authRoutes);
+
 
 // Error handling middleware
 app.use((err, req, res) => {
