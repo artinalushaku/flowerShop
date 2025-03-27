@@ -8,6 +8,7 @@ import Signup from './components/Signup';
 import ProtectedRoute from './components/ProtectedRoute';
 import AboutUs from './components/AboutUs';
 import Shop from './components/Shop';
+import Contact from './components/Contact';
 
 
 // AppContent component that can access useLocation
@@ -128,6 +129,7 @@ const AppContent = () => {
         <Route path="/" element={<HomePage />} />
         {/* Add other routes here */}
         <Route path="/about" element={<AboutUs />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
     </div>
   );
