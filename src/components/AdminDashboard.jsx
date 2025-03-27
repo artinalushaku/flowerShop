@@ -2,9 +2,36 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ProductManagement from './ProductManagement';
 import UserManagement from './UserManagement';
+import MessageManagement from './MessageManagement';
 
 function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [unreadMessages, setUnreadMessages] = useState(0);
+
+  useEffect(() => {
+    // Fetch unread message count when the component mounts or when switching to dashboard
+    if (activeTab === 'dashboard' || activeTab === 'messages') {
+      fetchUnreadMessageCount();
+    }
+  }, [activeTab]);
+
+  const fetchUnreadMessageCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/messages/unread-count', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUnreadMessages(data.count);
+      }
+    } catch (error) {
+      console.error('Error fetching unread message count:', error);
+    }
+  };
 
   const renderContent = () => {
     switch(activeTab) {
@@ -12,10 +39,12 @@ function AdminDashboard() {
         return <ProductManagement />;
       case 'users':
         return <UserManagement />;
+      case 'messages':
+        return <MessageManagement />;
       case 'dashboard':
-        return <DashboardOverview />;
+        return <DashboardOverview unreadMessages={unreadMessages} />;
       default:
-        return <DashboardOverview />;
+        return <DashboardOverview unreadMessages={unreadMessages} />;
     }
   };
 
@@ -52,6 +81,19 @@ function AdminDashboard() {
                 </button>
               </li>
               <li>
+                <button 
+                  onClick={() => setActiveTab('messages')}
+                  className={`w-full text-left px-4 py-2 rounded flex items-center justify-between ${activeTab === 'messages' ? 'bg-rose-800' : 'hover:bg-rose-600'}`}
+                >
+                  <span>Messages</span>
+                  {unreadMessages > 0 && (
+                    <span className="bg-white text-rose-700 text-xs rounded-full px-2 py-1 font-bold">
+                      {unreadMessages}
+                    </span>
+                  )}
+                </button>
+              </li>
+              <li>
                 <Link to="/" className="block px-4 py-2 rounded hover:bg-rose-600">
                   Back to Website
                 </Link>
@@ -69,7 +111,7 @@ function AdminDashboard() {
   );
 }
 
-function DashboardOverview() {
+function DashboardOverview({ unreadMessages }) {
   const [productCount, setProductCount] = useState(0);
   const [userCount, setUserCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -125,9 +167,9 @@ function DashboardOverview() {
           <p className="text-gray-500 mt-2">Registered users</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold text-gray-700">Revenue</h3>
-          <div className="text-3xl font-bold text-rose-600 mt-2">$1,245</div>
-          <p className="text-gray-500 mt-2">Last 7 days</p>
+          <h3 className="text-lg font-semibold text-gray-700">Messages</h3>
+          <div className="text-3xl font-bold text-rose-600 mt-2">{unreadMessages}</div>
+          <p className="text-gray-500 mt-2">Unread messages</p>
         </div>
       </div>
       
@@ -136,6 +178,7 @@ function DashboardOverview() {
         <p className="text-gray-600">Welcome to your admin dashboard. Here you can manage your products, users, and check your store's performance.</p>
         <p className="text-gray-600 mt-2">Click on "Manage Products" in the sidebar to add, edit, or delete products.</p>
         <p className="text-gray-600 mt-2">Click on "Manage Users" to view and update user information and roles.</p>
+        <p className="text-gray-600 mt-2">Click on "Messages" to view and respond to customer inquiries from the contact form.</p>
       </div>
     </div>
   );

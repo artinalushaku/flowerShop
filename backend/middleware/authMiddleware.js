@@ -4,7 +4,7 @@ import process from 'process';
 
 dotenv.config();
 
-const auth = (req, res, next) => {
+export const authMiddleware = (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
 
@@ -20,4 +20,12 @@ const auth = (req, res, next) => {
   }
 };
 
-export default auth;
+export const adminMiddleware = (req, res, next) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Access denied. Admin privileges required.' });
+  }
+  next();
+};
+
+// For backward compatibility
+export default authMiddleware;

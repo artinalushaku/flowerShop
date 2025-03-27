@@ -1,6 +1,6 @@
 import express from 'express';
 import { register, login, getAllUsers, getUserById, updateUser, deleteUser } from '../controllers/authController.js';
-import auth from '../middleware/authMiddleware.js';
+import { authMiddleware, adminMiddleware } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -9,9 +9,9 @@ router.post('/register', register);
 router.post('/login', login);
 
 // Protected admin-only routes
-router.get('/users', auth, getAllUsers);
-router.get('/users/:id', auth, getUserById);
-router.put('/users/:id', auth, updateUser);
-router.delete('/users/:id', auth, deleteUser);
+router.get('/users', authMiddleware, adminMiddleware, getAllUsers);
+router.get('/users/:id', authMiddleware, adminMiddleware, getUserById);
+router.put('/users/:id', authMiddleware, adminMiddleware, updateUser);
+router.delete('/users/:id', authMiddleware, adminMiddleware, deleteUser);
 
 export default router; 
