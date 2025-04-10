@@ -24,7 +24,7 @@ export const register = async (req, res) => {
       });
     }
 
-    // Create new user with role (defaults to 'user' if not provided)
+    // krijoje nje user te ri me role (defaults to 'user' if not provided)
     const user = await User.create({
       firstName,
       lastName,
@@ -110,10 +110,10 @@ export const login = async (req, res) => {
   }
 };
 
-// Get all users - admin only
+// me i marr krejt userat (prej adminit )
 export const getAllUsers = async (req, res) => {
   try {
-    // Check if the requesting user is an admin
+    // kontrolloje se a eshte useri admin
     if (req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Access denied. Admin only.' });
     }
@@ -122,7 +122,7 @@ export const getAllUsers = async (req, res) => {
       attributes: ['id', 'firstName', 'lastName', 'email', 'phoneNumber', 'username', 'role', 'createdAt']
     });
 
-    res.json(users);
+    res.json(users); //nese osht admin kthej userat 
   } catch (error) {
     res.status(500).json({
       message: 'Error fetching users',
@@ -131,10 +131,10 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// Get user by ID - admin only
+// merr userin prej Id (prej adminit)
 export const getUserById = async (req, res) => {
   try {
-    // Check if the requesting user is an admin
+    
     if (req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Access denied. Admin only.' });
     }
