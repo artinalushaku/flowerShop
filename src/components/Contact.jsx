@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 function Contact() {
   const [formData, setFormData] = useState({
@@ -15,6 +15,16 @@ function Contact() {
     message: '',
     isLoading: false
   });
+  
+  // Use a ref to track if the component is mounted
+  const isMounted = useRef(true);
+  
+  // Set isMounted to false when component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,40 +55,47 @@ function Contact() {
       
       const data = await response.json();
       
-      if (response.ok) {
-        // Success
-        setSubmitStatus({
-          submitted: true,
-          success: true,
-          message: 'Thank you for your message! We will get back to you soon.',
-          isLoading: false
-        });
-        
-        // Reset form
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          subject: '',
-          message: ''
-        });
-      } else {
-        // Error
-        setSubmitStatus({
-          submitted: true,
-          success: false,
-          message: data.message || 'Something went wrong. Please try again.',
-          isLoading: false
-        });
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        if (response.ok) {
+          // Success
+          setSubmitStatus({
+            submitted: true,
+            success: true,
+            message: 'Thank you for your message! We will get back to you soon.',
+            isLoading: false
+          });
+          
+          // Reset form
+          setFormData({
+            name: '',
+            email: '',
+            phone: '',
+            subject: '',
+            message: ''
+          });
+        } else {
+          // Error
+          setSubmitStatus({
+            submitted: true,
+            success: false,
+            message: data.message || 'Something went wrong. Please try again.',
+            isLoading: false
+          });
+        }
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      setSubmitStatus({
-        submitted: true,
-        success: false,
-        message: 'Network error. Please check your connection and try again.',
-        isLoading: false
-      });
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setSubmitStatus({
+          submitted: true,
+          success: false,
+          message: 'Network error. Please check your connection and try again.',
+          isLoading: false
+        });
+      }
     }
   };
 

@@ -11,6 +11,7 @@ function ProductManagement() {
         stock: ''
     });
     const [editingId, setEditingId] = useState(null);
+    const [error, setError] = useState(null);
 
     // Fetch all products
     useEffect(() => {
@@ -22,8 +23,10 @@ function ProductManagement() {
             const response = await fetch('http://localhost:5000/api/products');
             const data = await response.json();
             setProducts(data);
+            setError(null);
         } catch (error) {
             console.error('Error fetching products:', error);
+            setError('Failed to load products');
         }
     };
 
@@ -38,7 +41,14 @@ function ProductManagement() {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError(null);
         try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setError('You must be logged in as an admin to perform this action');
+                return;
+            }
+
             const url = editingId 
                 ? `http://localhost:5000/api/products/${editingId}`
                 : 'http://localhost:5000/api/products';
@@ -49,6 +59,7 @@ function ProductManagement() {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(formData),
             });
@@ -57,9 +68,13 @@ function ProductManagement() {
                 fetchProducts();
                 resetForm();
                 setEditingId(null);
+            } else {
+                const data = await response.json();
+                setError(data.message || 'Failed to save product');
             }
         } catch (error) {
             console.error('Error saving product:', error);
+            setError('An error occurred while saving the product');
         }
     };
 
@@ -67,20 +82,36 @@ function ProductManagement() {
     const handleEdit = (product) => {
         setFormData(product);
         setEditingId(product.id);
+        setError(null);
     };
 
     // Handle delete button click
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
+            setError(null);
             try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setError('You must be logged in as an admin to perform this action');
+                    return;
+                }
+
                 const response = await fetch(`http://localhost:5000/api/products/${id}`, {
                     method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
+                
                 if (response.ok) {
                     fetchProducts();
+                } else {
+                    const data = await response.json();
+                    setError(data.message || 'Failed to delete product');
                 }
             } catch (error) {
                 console.error('Error deleting product:', error);
+                setError('An error occurred while deleting the product');
             }
         }
     };
@@ -95,11 +126,19 @@ function ProductManagement() {
             imageUrl: '',
             stock: ''
         });
+        setError(null);
     };
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <h2 className="text-2xl font-bold mb-6">Product Management</h2>
+            
+            {/* Error Display */}
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                    <span className="block sm:inline">{error}</span>
+                </div>
+            )}
             
             {/* Product Form */}
             <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-8">

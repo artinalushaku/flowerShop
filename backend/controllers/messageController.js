@@ -18,45 +18,53 @@ export const createMessage = async (req, res) => {
       message
     });
     
-    // Send email to shop owner
-    try {
-      // Create transporter (you'll need to configure this with your email service)
-      const transporter = nodemailer.createTransport({
-        host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-        port: process.env.EMAIL_PORT || 587,
-        secure: process.env.EMAIL_SECURE === 'true',
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASSWORD
-        }
-      });
-      
-      await transporter.sendMail({
-        from: `"Blooming Delights Website" <${process.env.EMAIL_USER}>`,
-        to: "hello@bloomingdelights.com",
-        subject: `New Contact Form Message: ${subject}`,
-        text: `
-          Name: ${name}
-          Email: ${email}
-          Phone: ${phone || 'Not provided'}
-          
-          Message:
-          ${message}
-        `,
-        html: `
-          <h3>New Message from Contact Form</h3>
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
-          <p><strong>Subject:</strong> ${subject}</p>
-          <hr>
-          <p><strong>Message:</strong></p>
-          <p>${message.replace(/\n/g, '<br>')}</p>
-        `
-      });
-    } catch (emailError) {
-      console.error('Error sending email:', emailError);
-      // Continue even if email fails
+    // Send email to shop owner - only attempt if credentials exist
+    const emailUser = process.env.EMAIL_USER;
+    const emailPassword = process.env.EMAIL_PASSWORD;
+    
+    if (emailUser && emailPassword) {
+      try {
+        // Create transporter
+        const transporter = nodemailer.createTransport({
+          host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+          port: process.env.EMAIL_PORT || 587,
+          secure: process.env.EMAIL_SECURE === 'true',
+          auth: {
+            user: emailUser,
+            pass: emailPassword
+          }
+        });
+        
+        await transporter.sendMail({
+          from: `"Blooming Delights Website" <${emailUser}>`,
+          to: "hello@bloomingdelights.com",
+          subject: `New Contact Form Message: ${subject}`,
+          text: `
+            Name: ${name}
+            Email: ${email}
+            Phone: ${phone || 'Not provided'}
+            
+            Message:
+            ${message}
+          `,
+          html: `
+            <h3>New Message from Contact Form</h3>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+            <p><strong>Subject:</strong> ${subject}</p>
+            <hr>
+            <p><strong>Message:</strong></p>
+            <p>${message.replace(/\n/g, '<br>')}</p>
+          `
+        });
+        console.log('Email notification sent successfully');
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
+        // Continue even if email fails
+      }
+    } else {
+      console.log('Email notifications are disabled. Set EMAIL_USER and EMAIL_PASSWORD environment variables to enable.');
     }
     
     res.status(201).json({
