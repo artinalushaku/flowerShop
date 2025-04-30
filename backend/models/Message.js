@@ -23,7 +23,13 @@ const Message = sequelize.define('Message', {
   },
   message: {
     type: DataTypes.TEXT,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      len: {
+        args: [10, 500],
+        msg: 'Message must be between 10 and 500 characters'
+      }
+    }
   },
   isRead: {
     type: DataTypes.BOOLEAN,

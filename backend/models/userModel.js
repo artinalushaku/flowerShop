@@ -10,11 +10,23 @@ const User = sequelize.define('User', {
   },
   firstName: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      len: {
+        args: [4, 50],
+        msg: 'First name must be between 4 and 50 characters'
+      }
+    }
   },
   lastName: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      len: {
+        args: [4, 50],
+        msg: 'Last name must be between 4 and 50 characters'
+      }
+    }
   },
   email: {
     type: DataTypes.STRING,

@@ -10,6 +10,15 @@ export const createMessage = async (req, res) => {
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
     
+    // Validate message length
+    if (!message || message.length < 10) {
+      return res.status(400).json({ message: 'Message must be at least 10 characters long' });
+    }
+    
+    if (message.length > 500) {
+      return res.status(400).json({ message: 'Message cannot exceed 500 characters' });
+    }
+    
     const newMessage = await Message.create({
       name,
       email,

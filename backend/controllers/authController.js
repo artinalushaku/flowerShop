@@ -11,6 +11,19 @@ export const register = async (req, res) => {
   try {
     const { firstName, lastName, email, phoneNumber, username, password, role } = req.body;
 
+    // Validate name lengths
+    if (!firstName || firstName.length < 4) {
+      return res.status(400).json({
+        message: 'First name must be at least 4 characters long'
+      });
+    }
+
+    if (!lastName || lastName.length < 4) {
+      return res.status(400).json({
+        message: 'Last name must be at least 4 characters long'
+      });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({
       where: {

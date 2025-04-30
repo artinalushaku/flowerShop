@@ -38,10 +38,14 @@ function Signup() {
     
     if (!formData.firstName) {
       newErrors.firstName = 'First name is required';
+    } else if (formData.firstName.length < 4) {
+      newErrors.firstName = 'First name must be at least 4 characters';
     }
     
     if (!formData.lastName) {
       newErrors.lastName = 'Last name is required';
+    } else if (formData.lastName.length < 4) {
+      newErrors.lastName = 'Last name must be at least 4 characters';
     }
     
     if (!formData.email) {

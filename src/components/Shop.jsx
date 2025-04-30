@@ -4,6 +4,10 @@ function Shop() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  
+  // Limit for displayed categories
+  const MAX_DISPLAYED_CATEGORIES = 4;
   
   useEffect(() => {
     fetchProducts();
@@ -26,7 +30,11 @@ function Shop() {
   const filteredProducts = selectedCategory 
     ? products.filter(product => product.category === selectedCategory)
     : products;
-    
+  
+  // Split categories for display
+  const displayedCategories = categories.slice(0, MAX_DISPLAYED_CATEGORIES);
+  const moreCategories = categories.slice(MAX_DISPLAYED_CATEGORIES);
+  
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Our Collection</h1>
@@ -40,7 +48,9 @@ function Shop() {
           >
             All
           </button>
-          {categories.map(category => (
+          
+          {/* First 4 categories displayed directly */}
+          {displayedCategories.map(category => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
@@ -49,6 +59,40 @@ function Shop() {
               {category}
             </button>
           ))}
+          
+          {/* More dropdown for additional categories */}
+          {moreCategories.length > 0 && (
+            <div className="relative">
+              <button 
+                onClick={() => setShowMoreMenu(!showMoreMenu)}
+                className="px-4 py-2 rounded-full bg-gray-200 text-gray-800 hover:bg-gray-300"
+              >
+                Më shumë ({moreCategories.length})
+              </button>
+              
+              {showMoreMenu && (
+                <div className="absolute z-10 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                  <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="more-categories-button">
+                    {moreCategories.map(category => (
+                      <button
+                        key={category}
+                        onClick={() => {
+                          setSelectedCategory(category);
+                          setShowMoreMenu(false);
+                        }}
+                        className={`block w-full text-left px-4 py-2 text-sm ${
+                          selectedCategory === category ? 'bg-rose-100 text-rose-900' : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                        role="menuitem"
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
       

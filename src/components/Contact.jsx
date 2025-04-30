@@ -37,6 +37,27 @@ function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validate message length
+    if (formData.message.length < 10) {
+      setSubmitStatus({
+        submitted: true,
+        success: false,
+        message: 'Your message must be at least 10 characters long.',
+        isLoading: false
+      });
+      return;
+    }
+    
+    if (formData.message.length > 500) {
+      setSubmitStatus({
+        submitted: true,
+        success: false,
+        message: 'Your message cannot exceed 500 characters.',
+        isLoading: false
+      });
+      return;
+    }
+    
     // Set loading state
     setSubmitStatus({
       ...submitStatus,
@@ -347,6 +368,16 @@ function Contact() {
                           className="peer w-full border-2 border-gray-300 p-3 rounded-lg focus:border-rose-500 focus:outline-none transition-colors placeholder-transparent"
                           placeholder="Your Message"
                         ></textarea>
+                        <div className="mt-1 text-xs text-gray-500 flex justify-between">
+                          <span>{formData.message.length} characters</span>
+                          <span className={`${
+                            formData.message.length < 10 || formData.message.length > 500 
+                              ? 'text-red-500 font-medium' 
+                              : 'text-gray-500'
+                          }`}>
+                            (Min: 10, Max: 500)
+                          </span>
+                        </div>
                       </div>
                     </div>
                     

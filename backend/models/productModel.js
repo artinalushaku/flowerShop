@@ -15,7 +15,7 @@ const Product = sequelize.define('Product', {
     allowNull: false
   },
   category: {
-    type: DataTypes.ENUM('Wedding Flowers', 'Birthday Bouquets', 'Seasonal Specials', 'Custom Arrangements'),
+    type: DataTypes.STRING,
     allowNull: false
   },
   imageUrl: {

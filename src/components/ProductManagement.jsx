@@ -2,6 +2,15 @@ import { useState, useEffect } from 'react';
 
 function ProductManagement() {
     const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState([
+        'Wedding Flowers',
+        'Birthday Bouquets',
+        'Seasonal Specials',
+        'Custom Arrangements'
+    ]);
+    const [newCategory, setNewCategory] = useState('');
+    const [showAddCategory, setShowAddCategory] = useState(false);
+    const [showCategoryManager, setShowCategoryManager] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         description: '',
@@ -23,6 +32,14 @@ function ProductManagement() {
             const response = await fetch('http://localhost:5000/api/products');
             const data = await response.json();
             setProducts(data);
+            
+            // Extract unique categories from products
+            const uniqueCategories = [...new Set(data.map(product => product.category))];
+            setCategories(prevCategories => {
+                const mergedCategories = [...new Set([...prevCategories, ...uniqueCategories])];
+                return mergedCategories;
+            });
+            
             setError(null);
         } catch (error) {
             console.error('Error fetching products:', error);
@@ -36,6 +53,42 @@ function ProductManagement() {
             ...formData,
             [e.target.name]: e.target.value
         });
+    };
+    
+    // Handle adding a new category
+    const handleAddCategory = () => {
+        if (newCategory.trim() === '') {
+            return;
+        }
+        
+        if (categories.includes(newCategory.trim())) {
+            setError('This category already exists');
+            return;
+        }
+        
+        setCategories([...categories, newCategory.trim()]);
+        setFormData({
+            ...formData,
+            category: newCategory.trim()
+        });
+        setNewCategory('');
+        setShowAddCategory(false);
+    };
+    
+    // Handle deleting a category
+    const handleDeleteCategory = (categoryToDelete) => {
+        // Check if any products are using this category
+        const productsWithCategory = products.filter(product => product.category === categoryToDelete);
+        
+        if (productsWithCategory.length > 0) {
+            setError(`Cannot delete category "${categoryToDelete}" because it is being used by ${productsWithCategory.length} product(s).`);
+            return;
+        }
+        
+        if (window.confirm(`Are you sure you want to delete the category "${categoryToDelete}"?`)) {
+            setCategories(categories.filter(category => category !== categoryToDelete));
+            setError(null);
+        }
     };
 
     // Handle form submission
@@ -140,6 +193,62 @@ function ProductManagement() {
                 </div>
             )}
             
+            {/* Category Management Section */}
+            <div className="mb-8">
+                <button
+                    onClick={() => setShowCategoryManager(!showCategoryManager)}
+                    className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded mb-4"
+                >
+                    {showCategoryManager ? 'Hide Category Manager' : 'Manage Categories'}
+                </button>
+                
+                {showCategoryManager && (
+                    <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+                        <h3 className="text-xl font-bold mb-4">Category Management</h3>
+                        
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2">
+                                Add New Category
+                            </label>
+                            <div className="flex">
+                                <input
+                                    type="text"
+                                    value={newCategory}
+                                    onChange={(e) => setNewCategory(e.target.value)}
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    placeholder="New category name"
+                                />
+                                <button 
+                                    type="button"
+                                    onClick={handleAddCategory}
+                                    className="ml-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                                    disabled={!newCategory.trim()}
+                                >
+                                    Add Category
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 className="text-lg font-semibold mb-2">Current Categories</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                {categories.map(category => (
+                                    <div key={category} className="flex items-center justify-between bg-gray-100 p-2 rounded">
+                                        <span>{category}</span>
+                                        <button
+                                            onClick={() => handleDeleteCategory(category)}
+                                            className="ml-2 bg-red-500 hover:bg-red-700 text-white text-xs font-bold py-1 px-2 rounded"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+            
             {/* Product Form */}
             <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -173,19 +282,55 @@ function ProductManagement() {
                         <label className="block text-gray-700 text-sm font-bold mb-2">
                             Category
                         </label>
-                        <select
-                            name="category"
-                            value={formData.category}
-                            onChange={handleChange}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            required
-                        >
-                            <option value="">Select a category</option>
-                            <option value="Wedding Flowers">Wedding Flowers</option>
-                            <option value="Birthday Bouquets">Birthday Bouquets</option>
-                            <option value="Seasonal Specials">Seasonal Specials</option>
-                            <option value="Custom Arrangements">Custom Arrangements</option>
-                        </select>
+                        {showAddCategory ? (
+                            <div className="flex">
+                                <input
+                                    type="text"
+                                    value={newCategory}
+                                    onChange={(e) => setNewCategory(e.target.value)}
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    placeholder="New category name"
+                                />
+                                <button 
+                                    type="button"
+                                    onClick={handleAddCategory}
+                                    className="ml-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded"
+                                >
+                                    Add
+                                </button>
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowAddCategory(false)}
+                                    className="ml-1 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-3 rounded"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex">
+                                <select
+                                    name="category"
+                                    value={formData.category}
+                                    onChange={handleChange}
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    required
+                                >
+                                    <option value="">Select a category</option>
+                                    {categories.map(category => (
+                                        <option key={category} value={category}>
+                                            {category}
+                                        </option>
+                                    ))}
+                                </select>
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowAddCategory(true)}
+                                    className="ml-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded"
+                                >
+                                    New
+                                </button>
+                            </div>
+                        )}
                     </div>
                     <div>
                         <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -264,7 +409,7 @@ function ProductManagement() {
                             </tr>
                         </thead>
                         <tbody>
-                            {products.map((product) => (
+                            {products.map(product => (
                                 <tr key={product.id} className="border-b">
                                     <td className="px-4 py-2">{product.name}</td>
                                     <td className="px-4 py-2">${product.price}</td>
