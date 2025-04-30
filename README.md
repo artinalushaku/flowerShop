@@ -83,7 +83,7 @@ npm install
 npm run dev
 ```
 
-The frontend application should now be running on http://localhost:3000
+The frontend application should now be running on http://localhost:8081
 
 ## Usage
 

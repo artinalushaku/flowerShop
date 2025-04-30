@@ -13,7 +13,8 @@ app.use(express.json());
 
 
 // Sync sequelize models
-sequelize.sync({ alter: true })
+//sequelize.sync({ alter: true })
+sequelize.sync()
   .then(() => console.log('Database synchronized'))
   .catch(err => console.error('Failed to sync database:', err));
 
