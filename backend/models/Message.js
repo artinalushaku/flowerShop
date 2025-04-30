@@ -9,9 +9,9 @@ const Message = sequelize.define('Message', {
   email: {
     type: DataTypes.STRING,
     allowNull: false,
-    validate: {
+     validate: {
       isEmail: true
-    }
+     }
   },
   phone: {
     type: DataTypes.STRING,

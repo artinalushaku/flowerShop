@@ -67,12 +67,18 @@ function Login() {
         throw new Error(data.message || 'Login failed');
       }
 
+      // Ensure user data has join date and other profile fields
+      const userData = {
+        ...data.user,
+        joinDate: data.user.joinDate || new Date().toISOString()
+      };
+
       // Store token and user data in localStorage
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('user', JSON.stringify(userData));
       
       // Redirect based on role
-      if (data.user.role === 'admin') {
+      if (userData.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/');

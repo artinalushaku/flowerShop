@@ -4,12 +4,11 @@ import ProductManagement from './components/ProductManagement';
 import AdminDashboard from './components/AdminDashboard';
 import Login from './components/Login';
 import Signup from './components/Signup';
-
 import ProtectedRoute from './components/ProtectedRoute';
 import AboutUs from './components/AboutUs';
 import Shop from './components/Shop';
 import Contact from './components/Contact';
-
+import UserProfile from './components/UserProfile';
 
 // AppContent component that can access useLocation
 const AppContent = () => {
@@ -58,6 +57,9 @@ const AppContent = () => {
               {isAdmin && (
                 <Link to="/admin" className="text-gray-600 hover:text-rose-500 px-3 py-2 rounded-md">Admin</Link>
               )}
+              {isLoggedIn && (
+                <Link to="/profile" className="text-gray-600 hover:text-rose-500 px-3 py-2 rounded-md">My Profile</Link>
+              )}
               {!isLoggedIn ? (
                 <Link to="/login" className="text-white bg-rose-500 hover:bg-rose-600 px-4 py-2 rounded-md">Login</Link>
               ) : (
@@ -95,6 +97,9 @@ const AppContent = () => {
               {isAdmin && (
                 <Link to="/admin" className="block text-gray-600 hover:text-rose-500 px-3 py-2 rounded-md">Admin</Link>
               )}
+              {isLoggedIn && (
+                <Link to="/profile" className="block text-gray-600 hover:text-rose-500 px-3 py-2 rounded-md">My Profile</Link>
+              )}
               {!isLoggedIn ? (
                 <Link to="/login" className="block text-gray-600 hover:text-rose-500 px-3 py-2 rounded-md">Login</Link>
               ) : (
@@ -122,10 +127,14 @@ const AppContent = () => {
             <ProductManagement />
           </ProtectedRoute>
         } />
+        <Route path="/profile" element={
+          <ProtectedRoute requiredRole="user">
+            <UserProfile />
+          </ProtectedRoute>
+        } />
         <Route path="/shop" element={<Shop />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-       
         <Route path="/" element={<HomePage />} />
         {/* Add other routes here */}
         <Route path="/about" element={<AboutUs />} />

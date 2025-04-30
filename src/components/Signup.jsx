@@ -107,12 +107,20 @@ function Signup() {
         throw new Error(data.message || 'Registration failed');
       }
 
+      // Add join date to user data
+      const userData = {
+        ...data.user,
+        joinDate: new Date().toISOString(),
+        phone: formData.phoneNumber,
+        name: `${formData.firstName} ${formData.lastName}`
+      };
+
       // Store token and user data in localStorage
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('user', JSON.stringify(userData));
       
       // Redirect based on role
-      if (data.user.role === 'admin') {
+      if (userData.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/');

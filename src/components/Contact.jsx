@@ -58,68 +58,59 @@ function Contact() {
       return;
     }
     
-    // Set loading state
-    setSubmitStatus({
-      ...submitStatus,
-      isLoading: true
-    });
+    // Create directly XMLHttpRequest
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://localhost:5000/api/messages');
+    xhr.setRequestHeader('Content-Type', 'application/json');
     
-    try {
-      // Send data to backend API
-      const response = await fetch('http://localhost:5000/api/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-      });
-      
-      const data = await response.json();
-      
-      // Only update state if component is still mounted
-      if (isMounted.current) {
-        if (response.ok) {
-          // Success
-          setSubmitStatus({
-            submitted: true,
-            success: true,
-            message: 'Thank you for your message! We will get back to you soon.',
-            isLoading: false
-          });
-          
-          // Reset form
-          setFormData({
-            name: '',
-            email: '',
-            phone: '',
-            subject: '',
-            message: ''
-          });
-        } else {
-          // Error
-          setSubmitStatus({
-            submitted: true,
-            success: false,
-            message: data.message || 'Something went wrong. Please try again.',
-            isLoading: false
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      
-      // Only update state if component is still mounted
-      if (isMounted.current) {
+    xhr.onload = function() {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        // Success response
+        console.log('Message sent successfully');
+        
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          subject: '',
+          message: ''
+        });
+        
+        // Update status
+        setSubmitStatus({
+          submitted: true,
+          success: true,
+          message: 'Thank you for your message! We will get back to you soon.',
+          isLoading: false
+        });
+      } else {
+        // Error response
+        console.error('Message sending failed:', xhr.responseText);
+        
         setSubmitStatus({
           submitted: true,
           success: false,
-          message: 'Network error. Please check your connection and try again.',
+          message: 'Something went wrong. Please try again.',
           isLoading: false
         });
       }
-    }
+    };
+    
+    xhr.onerror = function() {
+      console.error('Network error sending message');
+      
+      setSubmitStatus({
+        submitted: true,
+        success: false,
+        message: 'Network error. Please check your connection and try again.',
+        isLoading: false
+      });
+    };
+    
+    // Send the request with JSON data
+    xhr.send(JSON.stringify(formData));
   };
-
   return (
     <div className="bg-gradient-to-br from-rose-50 to-rose-100 min-h-screen py-16 relative overflow-hidden">
       {/* Decorative elements */}
@@ -264,8 +255,9 @@ function Contact() {
                   Send Us a Message
                 </h2>
                 
+                {/* Display success message */}
                 {submitStatus.submitted && (
-                  <div className={`${submitStatus.success ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-400'} border-l-4 p-6 mb-8 rounded-r-lg animate-pulse`}>
+                  <div className={`${submitStatus.success ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-400'} border-l-4 p-6 mb-8 rounded-r-lg ${submitStatus.success ? '' : 'animate-pulse'}`}>
                     <div className="flex">
                       <div className="flex-shrink-0">
                         {submitStatus.success ? (
@@ -288,7 +280,8 @@ function Contact() {
                   </div>
                 )}
 
-                {(!submitStatus.submitted || !submitStatus.success) && (
+                {/* Only show form if not successful submission */}
+                {!submitStatus.success && (
                   <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 gap-y-6 gap-x-8 sm:grid-cols-2">
                       <div className="relative">
@@ -383,27 +376,14 @@ function Contact() {
                     
                     <div className="mt-10">
                       <button
-                        type="submit"
-                        disabled={submitStatus.isLoading}
-                        className="w-full inline-flex justify-center py-3 px-6 border border-transparent shadow-lg text-base font-medium rounded-lg text-white bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transform transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                        type="submit" 
+                        className="w-full inline-flex justify-center py-3 px-6 border border-transparent shadow-lg text-base font-medium rounded-lg text-white bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transform transition-all hover:scale-[1.02] active:scale-[0.98]"
                       >
                         <span className="flex items-center">
-                          {submitStatus.isLoading ? (
-                            <>
-                              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                              </svg>
-                              Sending...
-                            </>
-                          ) : (
-                            <>
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                              </svg>
-                              Send Message
-                            </>
-                          )}
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                          </svg>
+                          Send Message
                         </span>
                       </button>
                     </div>
