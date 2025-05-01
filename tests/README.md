@@ -25,17 +25,36 @@ Run the Selenium tests:
 npm run selenium
 ```
 
+Run specific test files:
+```
+npm run test:selenium1  # Runs test1.js
+```
+
 ## Current Tests
 
-The `selenium-test.js` file contains example tests:
-1. Loading the Google homepage
-2. Performing a Google search
+### test1.js - Core Functionality Tests
+The `test1.js` file contains tests for core site functionality:
+1. Homepage loading
+2. Navigation menu functionality
+3. Login form validation
+4. Contact form submission
+
+### Future Tests (test2.js and test3.js)
+These files will contain tests for additional functionalities:
+- Registration form validation
+- Shop product filtering
+- Product search
+- Add to cart functionality
+- User authentication flow
+- Admin dashboard access
+- Product management (admin)
+- User profile updates
 
 ## Adapting for Your Application
 
 To test your own application:
 
-1. Update the `selenium-test.js` file to navigate to your application URL
+1. Update the test files to navigate to your application URL
 2. Add tests specific to your application's features
 3. Use appropriate CSS selectors to interact with your application's elements
 

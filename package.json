@@ -8,10 +8,13 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-     "selenium": "node tests/selenium-test.js"
+    "test:selenium1": "node tests/test1.js",
+    "test:selenium2": "node tests/test2.js",
+    "test:selenium3": "node tests/test3.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "chromedriver": "^135.0.0",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
@@ -20,7 +23,8 @@
     "nodemon": "^3.1.9",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.4.0"
+    "react-router-dom": "^7.4.0",
+    "selenium-webdriver": "^4.31.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

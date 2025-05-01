@@ -24,7 +24,7 @@ function AboutUs() {
               <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Our Story</h2>
               <div className="max-w-3xl mx-auto prose text-gray-500 text-center">
                 <p className="text-lg">
-                  Blooming Delights began as a small family-owned flower stall in the local market. Founded by Artina Lushaku and Rina Ademaj, our passion for flowers blossomed into the vibrant shop you see today.
+                  Blooming Delights began as a small flower stall in the local market.Our passion for flowers blossomed into the vibrant shop you see today.
                 </p>
                 <p className="mt-4 text-lg">
                   What started as a weekend hobby has grown into a beloved establishment in our community. Our mission is simple: to spread joy and create memorable moments through the beauty of nature.
