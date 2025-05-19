@@ -8,11 +8,18 @@ const Product = sequelize.define('Product', {
   },
   description: {
     type: DataTypes.TEXT,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      len: [20, 500]
+    }
   },
   price: {
     type: DataTypes.DECIMAL(10, 2),
-    allowNull: false
+    allowNull: false,
+    validate: {
+      min: 1.00,
+      max: 999.99
+    }
   },
   category: {
     type: DataTypes.STRING,
@@ -20,12 +27,19 @@ const Product = sequelize.define('Product', {
   },
   imageUrl: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      len: [10, 250]
+    }
   },
   stock: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    defaultValue: 0
+    defaultValue: 0,
+    validate: {
+      min: 0,
+      max: 100
+    }
   }
 }, {
   tableName: 'products',

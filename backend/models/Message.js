@@ -19,7 +19,13 @@ const Message = sequelize.define('Message', {
   },
   subject: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      len: {
+        args: [3, 50],
+        msg: 'Subject must be between 3 and 50 characters'
+      }
+    }
   },
   message: {
     type: DataTypes.TEXT,

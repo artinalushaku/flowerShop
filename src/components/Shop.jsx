@@ -5,13 +5,21 @@ function Shop() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerCategory, setProductsPerCategory] = useState({});
   
-  // Limit for displayed categories
+  // Limit for displayed categories and pagination
   const MAX_DISPLAYED_CATEGORIES = 4;
+  const PRODUCTS_PER_PAGE = 50;
   
   useEffect(() => {
     fetchProducts();
   }, []);
+  
+  useEffect(() => {
+    // Reset to first page when category changes
+    setCurrentPage(1);
+  }, [selectedCategory]);
   
   const fetchProducts = async () => {
     try {
@@ -22,14 +30,27 @@ function Shop() {
       // Extract unique categories
       const uniqueCategories = [...new Set(data.map(product => product.category))];
       setCategories(uniqueCategories);
+      
+      // Count products per category
+      const categoryCount = {};
+      data.forEach(product => {
+        categoryCount[product.category] = (categoryCount[product.category] || 0) + 1;
+      });
+      setProductsPerCategory(categoryCount);
     } catch (error) {
       console.error('Error fetching products:', error);
     }
   };
   
+  // Filter products by selected category
   const filteredProducts = selectedCategory 
     ? products.filter(product => product.category === selectedCategory)
     : products;
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+  const displayedProducts = filteredProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
   
   // Split categories for display
   const displayedCategories = categories.slice(0, MAX_DISPLAYED_CATEGORIES);
@@ -56,7 +77,7 @@ function Shop() {
               onClick={() => setSelectedCategory(category)}
               className={`px-4 py-2 rounded-full ${selectedCategory === category ? 'bg-rose-600 text-white' : 'bg-gray-200 text-gray-800'}`}
             >
-              {category}
+              {category} ({productsPerCategory[category] || 0})
             </button>
           ))}
           
@@ -85,7 +106,7 @@ function Shop() {
                         }`}
                         role="menuitem"
                       >
-                        {category}
+                        {category} ({productsPerCategory[category] || 0})
                       </button>
                     ))}
                   </div>
@@ -96,46 +117,107 @@ function Shop() {
         </div>
       </div>
       
+      {/* Empty Category Message */}
+      {selectedCategory && filteredProducts.length === 0 && (
+        <div className="bg-gray-100 rounded-lg p-8 text-center">
+          <h2 className="text-xl font-medium text-gray-800 mb-2">Nuk ka produkte në këtë kategori</h2>
+          <p className="text-gray-600">Ju lutemi zgjidhni një kategori tjetër ose shikoni të gjitha produktet.</p>
+        </div>
+      )}
+      
       {/* Products Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredProducts.map(product => (
-          <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
-            {/* Product Image */}
-            <div className="h-64 overflow-hidden">
-              <img 
-                src={product.imageUrl} 
-                alt={product.name}
-                className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-              />
+      {displayedProducts.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {displayedProducts.map(product => (
+            <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
+              {/* Product Image */}
+              <div className="h-64 overflow-hidden">
+                <img 
+                  src={product.imageUrl} 
+                  alt={product.name}
+                  className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
+                />
+              </div>
+              
+              {/* Product Info */}
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-2">
+                  <h2 className="text-xl font-bold text-gray-900">{product.name}</h2>
+                  <span className="bg-rose-100 text-rose-800 text-sm font-medium px-2.5 py-0.5 rounded">${product.price}</span>
+                </div>
+                
+                <p className="text-gray-600 text-sm mb-4 line-clamp-3">{product.description}</p>
+                
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-500">
+                    Category: <span className="font-medium">{product.category}</span>
+                  </span>
+                  <span className={`text-sm ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+                  </span>
+                </div>
+                
+                <button 
+                  className="w-full mt-4 bg-rose-500 hover:bg-rose-600 text-white py-2 rounded-md transition-colors"
+                  disabled={product.stock <= 0}
+                >
+                  Add to Cart
+                </button>
+              </div>
             </div>
+          ))}
+        </div>
+      )}
+      
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-10">
+          <nav className="inline-flex rounded-md shadow-sm isolate">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`relative inline-flex items-center rounded-l-md px-3 py-2 text-sm font-medium 
+              ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'}`}
+            >
+              Previous
+            </button>
             
-            {/* Product Info */}
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-2">
-                <h2 className="text-xl font-bold text-gray-900">{product.name}</h2>
-                <span className="bg-rose-100 text-rose-800 text-sm font-medium px-2.5 py-0.5 rounded">${product.price}</span>
-              </div>
-              
-              <p className="text-gray-600 text-sm mb-4 line-clamp-3">{product.description}</p>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">
-                  Category: <span className="font-medium">{product.category}</span>
-                </span>
-                <span className={`text-sm ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-                </span>
-              </div>
-              
-              <button 
-                className="w-full mt-4 bg-rose-500 hover:bg-rose-600 text-white py-2 rounded-md transition-colors"
-                disabled={product.stock <= 0}
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`relative inline-flex items-center px-4 py-2 text-sm font-medium 
+                ${currentPage === index + 1 
+                  ? 'bg-rose-500 text-white' 
+                  : 'text-gray-700 hover:bg-gray-100'}`}
               >
-                Add to Cart
+                {index + 1}
               </button>
-            </div>
-          </div>
-        ))}
+            ))}
+            
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`relative inline-flex items-center rounded-r-md px-3 py-2 text-sm font-medium 
+              ${currentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'}`}
+            >
+              Next
+            </button>
+          </nav>
+        </div>
+      )}
+      
+      {/* Products Count Information */}
+      <div className="mt-4 text-center text-gray-500 text-sm">
+        {selectedCategory ? (
+          <>
+            Showing {Math.min(filteredProducts.length, PRODUCTS_PER_PAGE)} of {filteredProducts.length} products in "{selectedCategory}"
+          </>
+        ) : (
+          <>
+            Showing {Math.min(products.length, PRODUCTS_PER_PAGE)} of {products.length} products
+          </>
+        )}
       </div>
     </div>
   );

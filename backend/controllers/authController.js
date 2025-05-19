@@ -6,6 +6,11 @@ import process from 'process';
 
 dotenv.config();
 
+// Helper function to count admins
+const countAdmins = async () => {
+  return await User.count({ where: { role: 'admin' } });
+};
+
 // Register new user
 export const register = async (req, res) => {
   try {
@@ -35,6 +40,16 @@ export const register = async (req, res) => {
       return res.status(400).json({
         message: 'User with this email or username already exists'
       });
+    }
+
+    // Check admin count if registering as admin
+    if (role === 'admin') {
+      const adminCount = await countAdmins();
+      if (adminCount >= 10) {
+        return res.status(400).json({
+          message: 'Maximum number of administrators (10) has been reached'
+        });
+      }
     }
 
     // krijoje nje user te ri me role (defaults to 'user' if not provided)
@@ -185,6 +200,28 @@ export const updateUser = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Check if changing role from admin to non-admin
+    if (user.role === 'admin' && role !== 'admin') {
+      // Count admins to ensure we're not removing the last admin
+      const adminCount = await countAdmins();
+      if (adminCount <= 1) {
+        return res.status(400).json({ 
+          message: 'Cannot remove the last administrator. At least one administrator must remain in the system.'
+        });
+      }
+    }
+
+    // Check if changing role from non-admin to admin
+    if (user.role !== 'admin' && role === 'admin') {
+      // Count admins to ensure we're not exceeding the limit
+      const adminCount = await countAdmins();
+      if (adminCount >= 10) {
+        return res.status(400).json({ 
+          message: 'Maximum number of administrators (10) has been reached'
+        });
+      }
+    }
+
     // Update user fields
     user.firstName = firstName;
     user.lastName = lastName;
@@ -233,12 +270,63 @@ export const deleteUser = async (req, res) => {
       return res.status(400).json({ message: 'You cannot delete your own account' });
     }
 
+    // Check if trying to delete an admin
+    if (user.role === 'admin') {
+      // Count admins to ensure we're not removing the last admin
+      const adminCount = await countAdmins();
+      if (adminCount <= 1) {
+        return res.status(400).json({ 
+          message: 'Cannot delete the last administrator. At least one administrator must remain in the system.'
+        });
+      }
+    }
+
     await user.destroy();
 
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
     res.status(500).json({
       message: 'Error deleting user',
+      error: error.message
+    });
+  }
+};
+
+// Update own profile - for authenticated users to update their own profile
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { firstName, lastName, email, phoneNumber } = req.body;
+    
+    const user = await User.findByPk(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update user fields
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (email) user.email = email;
+    if (phoneNumber) user.phoneNumber = phoneNumber;
+
+    await user.save();
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        username: user.username,
+        phoneNumber: user.phoneNumber,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error updating profile',
       error: error.message
     });
   }

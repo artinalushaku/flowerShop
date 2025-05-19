@@ -21,6 +21,7 @@ function ProductManagement() {
     });
     const [editingId, setEditingId] = useState(null);
     const [error, setError] = useState(null);
+    const [categoryProductCounts, setCategoryProductCounts] = useState({});
 
     // Fetch all products
     useEffect(() => {
@@ -40,6 +41,13 @@ function ProductManagement() {
                 return mergedCategories;
             });
             
+            // Count products per category
+            const counts = {};
+            data.forEach(product => {
+                counts[product.category] = (counts[product.category] || 0) + 1;
+            });
+            setCategoryProductCounts(counts);
+            
             setError(null);
         } catch (error) {
             console.error('Error fetching products:', error);
@@ -57,22 +65,36 @@ function ProductManagement() {
     
     // Handle adding a new category
     const handleAddCategory = () => {
-        if (newCategory.trim() === '') {
+        const trimmedCategory = newCategory.trim();
+        
+        if (trimmedCategory === '') {
             return;
         }
         
-        if (categories.includes(newCategory.trim())) {
+        // Validate category name length
+        if (trimmedCategory.length < 3) {
+            setError('Category name must be at least 3 characters long');
+            return;
+        }
+        
+        if (trimmedCategory.length > 30) {
+            setError('Category name cannot exceed 30 characters');
+            return;
+        }
+        
+        if (categories.includes(trimmedCategory)) {
             setError('This category already exists');
             return;
         }
         
-        setCategories([...categories, newCategory.trim()]);
+        setCategories([...categories, trimmedCategory]);
         setFormData({
             ...formData,
-            category: newCategory.trim()
+            category: trimmedCategory
         });
         setNewCategory('');
         setShowAddCategory(false);
+        setError(null); // Clear error message on success
     };
     
     // Handle deleting a category
@@ -95,10 +117,93 @@ function ProductManagement() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
+        
+        console.log("Form data before validation:", formData);
+        
+        // Make sure price is properly formatted as a number
+        let price;
+        try {
+            // Handle both comma and period as decimal separators
+            const normalizedPrice = formData.price.toString().replace(',', '.');
+            price = parseFloat(normalizedPrice);
+            
+            if (isNaN(price)) {
+                setError('Price must be a valid number');
+                console.log("Validation error: Price is not a valid number");
+                return;
+            }
+        } catch (error) {
+            setError('Price format is invalid');
+            console.log("Validation error: Price format error", error);
+            return;
+        }
+        
+        const stock = parseInt(formData.stock);
+        
+        // Create a processed form data object with correctly formatted values
+        const processedFormData = {
+            ...formData,
+            price: price.toFixed(2), // Ensure price has 2 decimal places
+            stock: stock
+        };
+        
+        console.log("Processed form data:", processedFormData);
+        
+        // Validate price and stock
+        if (price < 0) {
+            setError('Price cannot be negative');
+            console.log("Validation error: Price is negative");
+            return;
+        }
+        
+        // Validate price is at least 1.00€
+        if (price < 1.00) {
+            setError('Price must be at least 1.00€');
+            console.log("Validation error: Price below minimum", price);
+            return;
+        }
+        
+        // Validate price is at most 999.99€
+        if (price > 999.99) {
+            setError('Price cannot exceed 999.99€');
+            console.log("Validation error: Price above maximum", price);
+            return;
+        }
+        
+        // Validate stock is not negative
+        if (stock < 0) {
+            setError('Stock cannot be negative');
+            console.log("Validation error: Stock is negative");
+            return;
+        }
+        
+        // Validate stock does not exceed maximum capacity
+        if (stock > 100) {
+            setError('Stock cannot exceed 100 items (maximum warehouse capacity)');
+            console.log("Validation error: Stock above maximum", stock);
+            return;
+        }
+        
+        // Validate description length
+        if (formData.description.length < 20) {
+            setError('Description must be at least 20 characters');
+            console.log("Validation error: Description too short", formData.description.length);
+            return;
+        }
+        
+        if (formData.description.length > 500) {
+            setError('Description cannot exceed 500 characters');
+            console.log("Validation error: Description too long", formData.description.length);
+            return;
+        }
+        
+        console.log("All validation passed");
+        
         try {
             const token = localStorage.getItem('token');
             if (!token) {
                 setError('You must be logged in as an admin to perform this action');
+                console.log("Validation error: No token found");
                 return;
             }
 
@@ -107,6 +212,9 @@ function ProductManagement() {
                 : 'http://localhost:5000/api/products';
             
             const method = editingId ? 'PUT' : 'POST';
+            
+            console.log("Sending request to:", url, "with method:", method);
+            console.log("Request body:", JSON.stringify(processedFormData));
 
             const response = await fetch(url, {
                 method,
@@ -114,16 +222,30 @@ function ProductManagement() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(processedFormData),
             });
 
             if (response.ok) {
+                console.log("Request successful");
                 fetchProducts();
                 resetForm();
                 setEditingId(null);
             } else {
                 const data = await response.json();
-                setError(data.message || 'Failed to save product');
+                console.error("Server error response:", data);
+                
+                // Display more detailed error message
+                if (data.validationErrors && data.validationErrors.length > 0) {
+                    // If we have specific validation errors from Sequelize
+                    const validationMessages = data.validationErrors.map(err => err.message).join(', ');
+                    setError(`Validation error: ${validationMessages}`);
+                } else if (data.error) {
+                    // If we have a specific error message
+                    setError(`${data.message}: ${data.error}`);
+                } else {
+                    // Default error message
+                    setError(data.message || 'Failed to save product');
+                }
             }
         } catch (error) {
             console.error('Error saving product:', error);
@@ -217,6 +339,8 @@ function ProductManagement() {
                                     onChange={(e) => setNewCategory(e.target.value)}
                                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                     placeholder="New category name"
+                                    minLength={3}
+                                    maxLength={30}
                                 />
                                 <button 
                                     type="button"
@@ -227,22 +351,37 @@ function ProductManagement() {
                                     Add Category
                                 </button>
                             </div>
+                            <p className="text-sm text-gray-500 mt-1">Category name must be between 3 and 30 characters.</p>
+                            <p className="text-sm text-amber-600 mt-1">Note: Each category can contain a maximum of 50 products.</p>
                         </div>
                         
                         <div>
                             <h4 className="text-lg font-semibold mb-2">Current Categories</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                                {categories.map(category => (
-                                    <div key={category} className="flex items-center justify-between bg-gray-100 p-2 rounded">
-                                        <span>{category}</span>
-                                        <button
-                                            onClick={() => handleDeleteCategory(category)}
-                                            className="ml-2 bg-red-500 hover:bg-red-700 text-white text-xs font-bold py-1 px-2 rounded"
-                                        >
-                                            Delete
-                                        </button>
-                                    </div>
-                                ))}
+                                {categories.map(category => {
+                                    const count = categoryProductCounts[category] || 0;
+                                    const isFull = count >= 50;
+                                    const isNearCapacity = count >= 40;
+                                    const bgColor = isFull ? 'bg-red-100' : isNearCapacity ? 'bg-amber-100' : 'bg-gray-100';
+                                    
+                                    return (
+                                        <div key={category} className={`flex items-center justify-between ${bgColor} p-2 rounded`}>
+                                            <span>
+                                                {category} 
+                                                <span className="ml-1 text-xs text-gray-600">
+                                                    ({count}/50)
+                                                </span>
+                                                {isFull && <span className="ml-1 text-xs text-red-600">(Full)</span>}
+                                            </span>
+                                            <button
+                                                onClick={() => handleDeleteCategory(category)}
+                                                className="ml-2 bg-red-500 hover:bg-red-700 text-white text-xs font-bold py-1 px-2 rounded"
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
@@ -275,36 +414,45 @@ function ProductManagement() {
                             value={formData.price}
                             onChange={handleChange}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            min="1"
+                            max="999.99"
+                            step="0.01"
                             required
                         />
+                        <p className="text-sm text-gray-500 mt-1">Price must be between 1.00€ and 999.99€.</p>
                     </div>
                     <div>
                         <label className="block text-gray-700 text-sm font-bold mb-2">
                             Category
                         </label>
                         {showAddCategory ? (
-                            <div className="flex">
-                                <input
-                                    type="text"
-                                    value={newCategory}
-                                    onChange={(e) => setNewCategory(e.target.value)}
-                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                    placeholder="New category name"
-                                />
-                                <button 
-                                    type="button"
-                                    onClick={handleAddCategory}
-                                    className="ml-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded"
-                                >
-                                    Add
-                                </button>
-                                <button 
-                                    type="button"
-                                    onClick={() => setShowAddCategory(false)}
-                                    className="ml-1 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-3 rounded"
-                                >
-                                    Cancel
-                                </button>
+                            <div className="flex flex-col">
+                                <div className="flex">
+                                    <input
+                                        type="text"
+                                        value={newCategory}
+                                        onChange={(e) => setNewCategory(e.target.value)}
+                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                        placeholder="New category name"
+                                        minLength={3}
+                                        maxLength={30}
+                                    />
+                                    <button 
+                                        type="button"
+                                        onClick={handleAddCategory}
+                                        className="ml-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded"
+                                    >
+                                        Add
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowAddCategory(false)}
+                                        className="ml-1 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-3 rounded"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                                <p className="text-sm text-gray-500 mt-1">Category name must be between 3 and 30 characters.</p>
                             </div>
                         ) : (
                             <div className="flex">
@@ -317,8 +465,12 @@ function ProductManagement() {
                                 >
                                     <option value="">Select a category</option>
                                     {categories.map(category => (
-                                        <option key={category} value={category}>
-                                            {category}
+                                        <option 
+                                            key={category} 
+                                            value={category}
+                                            disabled={categoryProductCounts[category] >= 50}
+                                        >
+                                            {category} ({categoryProductCounts[category] || 0}/50)
                                         </option>
                                     ))}
                                 </select>
@@ -342,8 +494,11 @@ function ProductManagement() {
                             value={formData.stock}
                             onChange={handleChange}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            min="0"
+                            max="100"
                             required
                         />
+                        <p className="text-sm text-gray-500 mt-1">Stock must be between 0 and 100 items.</p>
                     </div>
                     <div className="md:col-span-2">
                         <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -355,8 +510,11 @@ function ProductManagement() {
                             value={formData.imageUrl}
                             onChange={handleChange}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            minLength={10}
+                            maxLength={250}
                             required
                         />
+                        <p className="text-sm text-gray-500 mt-1">Image URL must be between 10 and 250 characters.</p>
                     </div>
                     <div className="md:col-span-2">
                         <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -368,8 +526,15 @@ function ProductManagement() {
                             onChange={handleChange}
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             rows="3"
+                            minLength={20}
+                            maxLength={500}
                             required
                         ></textarea>
+                        <div className="flex justify-end mt-1">
+                            <p className="text-sm text-gray-500">
+                                {formData.description.length}/500
+                            </p>
+                        </div>
                     </div>
                 </div>
                 <div className="flex items-center justify-between mt-4">

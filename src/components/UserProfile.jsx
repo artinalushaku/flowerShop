@@ -60,41 +60,80 @@ function UserProfile() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Get current user data
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    
-    // Update with new values
-    const updatedUser = {
-      ...user,
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      address: formData.address
-    };
-    
-    // Save back to localStorage
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-    
-    // Update state
-    setUserData({
-      ...userData,
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      address: formData.address
-    });
-    
-    // Show success message and exit edit mode
-    setSaveSuccess(true);
-    setIsEditing(false);
-    
-    // Hide success message after 3 seconds
-    setTimeout(() => {
-      setSaveSuccess(false);
-    }, 3000);
+    try {
+      // Get current user data
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // Get token for API request
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('You must be logged in to update your profile');
+      }
+      
+      // Split name into firstName and lastName
+      const nameParts = formData.name.split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+      
+      // Make API request to update user in the database
+      const response = await fetch('http://localhost:5000/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email: formData.email,
+          phoneNumber: formData.phone
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
+      }
+      
+      const responseData = await response.json();
+      
+      // Create updated user object with the returned data
+      const updatedUser = {
+        ...user,
+        name: `${responseData.user.firstName} ${responseData.user.lastName}`.trim(),
+        firstName: responseData.user.firstName,
+        lastName: responseData.user.lastName,
+        email: responseData.user.email,
+        phone: responseData.user.phoneNumber,
+        address: formData.address // Address is only stored in localStorage for now
+      };
+      
+      // Save back to localStorage
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // Update state
+      setUserData({
+        ...userData,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        address: updatedUser.address
+      });
+      
+      // Show success message and exit edit mode
+      setSaveSuccess(true);
+      setIsEditing(false);
+      
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 3000);
+    } catch (error) {
+      alert(error.message || 'Error updating profile');
+    }
   };
 
   const cancelEdit = () => {

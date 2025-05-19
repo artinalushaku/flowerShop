@@ -37,6 +37,27 @@ function Contact() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validate subject length
+    if (formData.subject.length < 3) {
+      setSubmitStatus({
+        submitted: true,
+        success: false,
+        message: 'Subject must be at least 3 characters long.',
+        isLoading: false
+      });
+      return;
+    }
+    
+    if (formData.subject.length > 50) {
+      setSubmitStatus({
+        submitted: true,
+        success: false,
+        message: 'Subject cannot exceed 50 characters.',
+        isLoading: false
+      });
+      return;
+    }
+    
     // Validate message length
     if (formData.message.length < 10) {
       setSubmitStatus({
@@ -340,11 +361,16 @@ function Contact() {
                           name="subject"
                           id="subject"
                           required
+                          minLength={3}
+                          maxLength={50}
                           value={formData.subject}
                           onChange={handleChange}
                           className="peer w-full border-b-2 border-gray-300 py-2 focus:border-rose-500 focus:outline-none transition-colors bg-transparent rounded-none placeholder-transparent"
                           placeholder="Message Subject"
                         />
+                        <div className="mt-1 text-xs text-gray-500 flex justify-end">
+                          <span>{formData.subject.length} characters</span>
+                        </div>
                       </div>
                       
                       <div className="sm:col-span-2 relative mt-4">
