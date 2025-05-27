@@ -96,13 +96,13 @@ class ProductController {
             }
             
             console.log("All validations passed, attempting to create product");
-            try {
-                const product = await Product.create(req.body);
+        try {
+            const product = await Product.create(req.body);
                 console.log("Product created successfully with ID:", product.id);
-                res.status(201).json({ 
-                    message: 'Product created successfully', 
-                    id: product.id 
-                });
+            res.status(201).json({ 
+                message: 'Product created successfully', 
+                id: product.id 
+            });
             } catch (dbError) {
                 console.error("Database error creating product:", dbError);
                 console.error("Validation errors:", dbError.errors);

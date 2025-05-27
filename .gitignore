@@ -9,6 +9,7 @@ lerna-debug.log*
 # dependencies
 /node_modules
 /backend/node_modules
+/tests/bdd/node_modules
 /.pnp
 .pnp.js
 

@@ -244,7 +244,7 @@ function ProductManagement() {
                     setError(`${data.message}: ${data.error}`);
                 } else {
                     // Default error message
-                    setError(data.message || 'Failed to save product');
+                setError(data.message || 'Failed to save product');
                 }
             }
         } catch (error) {
@@ -373,13 +373,13 @@ function ProductManagement() {
                                                 </span>
                                                 {isFull && <span className="ml-1 text-xs text-red-600">(Full)</span>}
                                             </span>
-                                            <button
-                                                onClick={() => handleDeleteCategory(category)}
-                                                className="ml-2 bg-red-500 hover:bg-red-700 text-white text-xs font-bold py-1 px-2 rounded"
-                                            >
-                                                Delete
-                                            </button>
-                                        </div>
+                                        <button
+                                            onClick={() => handleDeleteCategory(category)}
+                                            className="ml-2 bg-red-500 hover:bg-red-700 text-white text-xs font-bold py-1 px-2 rounded"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                     );
                                 })}
                             </div>
@@ -427,30 +427,30 @@ function ProductManagement() {
                         </label>
                         {showAddCategory ? (
                             <div className="flex flex-col">
-                                <div className="flex">
-                                    <input
-                                        type="text"
-                                        value={newCategory}
-                                        onChange={(e) => setNewCategory(e.target.value)}
-                                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                        placeholder="New category name"
+                            <div className="flex">
+                                <input
+                                    type="text"
+                                    value={newCategory}
+                                    onChange={(e) => setNewCategory(e.target.value)}
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    placeholder="New category name"
                                         minLength={3}
                                         maxLength={30}
-                                    />
-                                    <button 
-                                        type="button"
-                                        onClick={handleAddCategory}
-                                        className="ml-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded"
-                                    >
-                                        Add
-                                    </button>
-                                    <button 
-                                        type="button"
-                                        onClick={() => setShowAddCategory(false)}
-                                        className="ml-1 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-3 rounded"
-                                    >
-                                        Cancel
-                                    </button>
+                                />
+                                <button 
+                                    type="button"
+                                    onClick={handleAddCategory}
+                                    className="ml-2 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-3 rounded"
+                                >
+                                    Add
+                                </button>
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowAddCategory(false)}
+                                    className="ml-1 bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-3 rounded"
+                                >
+                                    Cancel
+                                </button>
                                 </div>
                                 <p className="text-sm text-gray-500 mt-1">Category name must be between 3 and 30 characters.</p>
                             </div>

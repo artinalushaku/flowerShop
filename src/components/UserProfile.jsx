@@ -64,9 +64,9 @@ function UserProfile() {
     e.preventDefault();
     
     try {
-      // Get current user data
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      
+    // Get current user data
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
       // Get token for API request
       const token = localStorage.getItem('token');
       if (!token) {
@@ -101,36 +101,36 @@ function UserProfile() {
       const responseData = await response.json();
       
       // Create updated user object with the returned data
-      const updatedUser = {
-        ...user,
+    const updatedUser = {
+      ...user,
         name: `${responseData.user.firstName} ${responseData.user.lastName}`.trim(),
         firstName: responseData.user.firstName,
         lastName: responseData.user.lastName,
         email: responseData.user.email,
         phone: responseData.user.phoneNumber,
         address: formData.address // Address is only stored in localStorage for now
-      };
-      
-      // Save back to localStorage
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      
-      // Update state
-      setUserData({
-        ...userData,
+    };
+    
+    // Save back to localStorage
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    // Update state
+    setUserData({
+      ...userData,
         name: updatedUser.name,
         email: updatedUser.email,
         phone: updatedUser.phone,
         address: updatedUser.address
-      });
-      
-      // Show success message and exit edit mode
-      setSaveSuccess(true);
-      setIsEditing(false);
-      
-      // Hide success message after 3 seconds
-      setTimeout(() => {
-        setSaveSuccess(false);
-      }, 3000);
+    });
+    
+    // Show success message and exit edit mode
+    setSaveSuccess(true);
+    setIsEditing(false);
+    
+    // Hide success message after 3 seconds
+    setTimeout(() => {
+      setSaveSuccess(false);
+    }, 3000);
     } catch (error) {
       alert(error.message || 'Error updating profile');
     }
