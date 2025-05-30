@@ -20,6 +20,7 @@ Selenium WebDriver is a tool for automating web browsers. It allows you to:
 
 ## Running Tests
 
+### Selenium Tests
 Run the Selenium tests:
 ```
 npm run selenium
@@ -28,7 +29,70 @@ npm run selenium
 Run specific test files:
 ```
 npm run test:selenium1  # Runs test1.js
+npm run test:selenium2  # Runs test2.js
+npm run test:selenium3  # Runs test3.js
 ```
+
+### BDD Tests with Cucumber
+
+The project also includes Behavior-Driven Development (BDD) tests using Cucumber.js. These tests are located in the `tests/bdd` directory and are organized by feature and test suite.
+
+#### Running BDD Tests
+
+Run all BDD tests:
+```bash
+npm run test:bdd
+```
+
+Run all tests for a specific suite:
+```bash
+# Run all anetari1 tests
+npm run test:bdd:anetari1:all
+
+# Run all anetari2 tests
+npm run test:bdd:anetari2:all
+
+# Run all anetari3 tests
+npm run test:bdd:anetari3:all
+```
+
+Run individual feature tests:
+```bash
+# Anetari1 Tests
+npm run test:bdd:anetari1:product    # Product validation
+npm run test:bdd:anetari1:category   # Category limit
+npm run test:bdd:anetari1:admin      # Admin count
+npm run test:bdd:anetari1:contact    # Contact form
+
+# Anetari2 Tests
+npm run test:bdd:anetari2:price       # Price validation
+npm run test:bdd:anetari2:stock       # Stock validation
+npm run test:bdd:anetari2:contact-email    # Contact email validation
+npm run test:bdd:anetari2:contact-message  # Contact message validation
+
+# Anetari3 Tests
+npm run test:bdd:anetari3:user-profile    # User profile tests
+npm run test:bdd:anetari3:category        # Category management
+npm run test:bdd:anetari3:user-management # User management
+npm run test:bdd:anetari3:message         # Message management
+```
+
+#### BDD Test Structure
+
+The BDD tests are organized as follows:
+```
+tests/bdd/
+├── features/              # Feature files
+│   ├── anetari1/         # Test suite 1
+│   ├── anetari2/         # Test suite 2
+│   └── anetari3/         # Test suite 3
+└── step_definitions/     # Step definition files
+    ├── anetari1/         # Step definitions for suite 1
+    ├── anetari2/         # Step definitions for suite 2
+    └── anetari3/         # Step definitions for suite 3
+```
+
+Each feature file (`.feature`) contains scenarios written in Gherkin syntax, and each step definition file (`.steps.js`) contains the implementation of these scenarios using Selenium WebDriver.
 
 ## Current Tests
 
@@ -88,4 +152,6 @@ testResults.push(await runTest('Homepage loads', async () => {
 
 - [Selenium WebDriver Documentation](https://www.selenium.dev/documentation/webdriver/)
 - [Selenium JavaScript API](https://www.selenium.dev/selenium/docs/api/javascript/index.html)
-- [ChromeDriver](https://chromedriver.chromium.org/) 
+- [ChromeDriver](https://chromedriver.chromium.org/)
+- [Cucumber.js Documentation](https://cucumber.io/docs/cucumber/)
+- [Gherkin Syntax Reference](https://cucumber.io/docs/gherkin/reference/) 

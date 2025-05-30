@@ -1,13 +1,16 @@
 export default {
     default: {
+        requireModule: ['ts-node/register'],
         require: [
-            './step_definitions/anetari1/*.steps.js'
+            './step_definitions/**/*.steps.js',
+            './support/hooks.js'
         ],
         paths: [
-            './features/anetari1/*.feature'
+            './features/**/*.feature'
         ],
-        format: ['progress-bar', 'html:cucumber-report.html'],
+        format: ['progress-bar', '@cucumber/pretty-formatter'],
         formatOptions: { snippetInterface: 'async-await' },
-        publishQuiet: true
+        publishQuiet: true,
+        parallel: 1
     }
 } 
